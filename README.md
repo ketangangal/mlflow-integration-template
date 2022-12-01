@@ -86,6 +86,7 @@ Navigate to scripts/mlflow-server-setup.sh
     6. reload the system 
 
 Navigate to scripts/authenticate-mlflow.sh
+
     1. Install engnix 
     2. Create Ngnix service 
     3. set username and password
