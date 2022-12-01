@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
@@ -8,8 +9,15 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import mlflow
 import mlflow.sklearn
 
+from mlflow.models.signature import infer_signature
+from mlflow.models.signature import ModelSignature
 
-mlflow.set_tracking_uri("http://65.2.69.79:8000/")
+
+# Set tracking api 
+mlflow.set_tracking_uri("http://13.232.137.83:8000/")
+
+
+# Get details of experiment 
 runid = mlflow.set_experiment(experiment_name="us-visa-knn")
 print("Name :", runid.name)
 print("Experiment Id :", runid.experiment_id)
@@ -17,6 +25,7 @@ print("Artifact Location :", runid.artifact_location)
 print("Lifecycle Stage :", runid.lifecycle_stage)
 
 
+# Evaluate model
 def evaluate_clf(true, predicted):
     acc = accuracy_score(true, predicted) 
     f1 = f1_score(true, predicted) 
@@ -35,7 +44,7 @@ def train(model):
 
     X_train, X_test, y_train, y_test = train_test_split(features, labels, random_state=42)
 
-    with mlflow.start_run(experiment_id=runid.experiment_id, run_name="run_test"):
+    with mlflow.start_run(experiment_id=runid.experiment_id, run_name="mlflow"):
         model.fit(X_train, y_train) 
         y_pred = model.predict(X_test)
 
@@ -54,7 +63,9 @@ def train(model):
         mlflow.log_param("Recall", recall) 
         mlflow.log_param("Roc Auc Score", roc_auc) 
 
-        mlflow.sklearn.log_model(model, artifact_path="sklearn-model" , registered_model_name="knn")
+        # Register Model Schema 
+        signature = infer_signature(X_train, y_test)
+        mlflow.sklearn.log_model(model, artifact_path="sklearn-model" , registered_model_name="knn",  signature=signature)
     mlflow.end_run()
     return True
 
