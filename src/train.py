@@ -44,6 +44,8 @@ def train(model):
 
     X_train, X_test, y_train, y_test = train_test_split(features, labels, random_state=42)
 
+
+    # Change run name according to the experiments that you are doing.
     with mlflow.start_run(experiment_id=runid.experiment_id, run_name="mlflow"):
         model.fit(X_train, y_train) 
         y_pred = model.predict(X_test)
@@ -65,10 +67,19 @@ def train(model):
 
         # Register Model Schema 
         signature = infer_signature(X_train, y_test)
-        mlflow.sklearn.log_model(model, artifact_path="sklearn-model" , registered_model_name="knn",  signature=signature)
+
+        mlflow.sklearn.log_model(
+            model, 
+            artifact_path="sklearn-model" , 
+            registered_model_name="knn", 
+            signature=signature
+            )
+
+    # End the current Run      
     mlflow.end_run()
     return True
 
 if __name__ == "__main__":
+    # Change model According data understanding 
     knn = KNeighborsClassifier()
     train(knn)
